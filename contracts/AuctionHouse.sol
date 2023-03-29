@@ -27,14 +27,14 @@ contract AuctionHouse is ERC721Holder, Ownable, ReentrancyGuard {
     uint256 private nextAuctionStartTime;
     uint256 public auctionCounter;
     mapping(uint256 => Auction) public auctions;
-    MyERC721 public erc721;
+    PeakyBirds public erc721;
 
     event AuctionCreated(uint256 indexed auctionId, uint256 tokenId);
     event BidPlaced(uint256 indexed auctionId, address indexed bidder, uint256 amount);
     event AuctionEnded(uint256 indexed auctionId, address indexed winner, uint256 amount);
 
     constructor(address erc721Address) {
-        erc721 = MyERC721(erc721Address);
+        erc721 = PeakyBirds(erc721Address);
         nextAuctionStartTime = block.timestamp;
         auctionCounter = 0;
     }
@@ -72,11 +72,12 @@ contract AuctionHouse is ERC721Holder, Ownable, ReentrancyGuard {
         emit AuctionCreated(auctionId, tokenId);
     }
 
-    function placeBid(uint256 auctionId) external payable nonReentrant {
-        Auction storage auction = auctions[auctionId];
-        require(block.timestamp <= auction.endTime, "Auction has ended");
-        require(msg.value > auction.highestBid && msg.value >= auction.startingPrice, "Bid not high enough");
-            if (auction.highestBidder != address(0)) {
+   function placeBid(uint256 auctionId) external payable nonReentrant {
+    Auction storage auction = auctions[auctionId];
+    require(block.timestamp <= auction.endTime, "Auction has ended");
+    require(msg.value > auction.highestBid && msg.value >= auction.startingPrice, "Bid not high enough");
+    
+    if (auction.highestBidder != address(0)) {
         auction.highestBidder.transfer(auction.highestBid);
     }
 
@@ -84,6 +85,7 @@ contract AuctionHouse is ERC721Holder, Ownable, ReentrancyGuard {
     auction.highestBid = msg.value;
     emit BidPlaced(auctionId, msg.sender, msg.value);
 }
+
 
 function withdraw() external onlyOwner {
     payable(msg.sender).transfer(address(this).balance);
@@ -93,12 +95,8 @@ function setStartingPrice(uint256 auctionId, uint256 startingPrice) external onl
     auctions[auctionId].startingPrice = startingPrice;
 }
 
-function getTokenInfo(uint256 auctionId) external view returns (string memory tokenURI, uint256 tokenId) {
-    tokenId = auctions[auctionId].tokenId;
-    tokenURI = IERC721(auctions[auctionId].tokenAddress).tokenURI(tokenId);
+// function getTokenInfo(uint256 auctionId) external view returns (string memory tokenURI, uint256 tokenId) {
+//     tokenId = auctions[auctionId].tokenId;
+//     tokenURI = IERC721(auctions[auctionId].tokenAddress).tokenURI(tokenId);
+// }
 }
-
-
-
-
-
