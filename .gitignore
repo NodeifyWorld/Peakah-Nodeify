@@ -1,0 +1,27 @@
+# Node modules
+node_modules/
+
+# Truffle build artifacts
+build/
+
+# Environment variables
+.env
+
+# Editor artifacts
+*.swp
+*.swo
+*.swn
+*.bak
+*.tmp
+*.sublime*
+*.orig
+*.log
+*.pid
+*.pyc
+*.swp
+*.viminfo
+*.code-workspace
+
+# Operating system artifacts
+.DS_Store
+Thumbs.db
