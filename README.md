@@ -38,7 +38,7 @@ Replace `rinkeby` with the network you wish to deploy to.
 
 ## Contracts
 
-- `MyERC721`: An ERC721 token contract with minting and transfer permissions managed by the ERC721Authority contract.
+- `PeakyBirds`: An ERC721 token contract with minting and transfer permissions managed by the ERC721Authority contract.
 - `ERC721Authority`: Manages minting and transfer permissions for the MyERC721 contract. It has a whitelist for the AuctionHouse contract and another whitelist for regular users. Minting can be enabled/disabled for regular users.
 - `AuctionHouse`: A contract that allows users to create auctions for their ERC721 tokens. The auction starts automatically, and a new auction begins once the previous auction ends and a new token is received. The highest bidder can claim the token at the end of the auction.
 
