@@ -1,6 +1,6 @@
 # My NFT Project
 
-This project includes an ERC721 token (MyERC721), an auction house contract (AuctionHouse), and an authority contract (ERC721Authority) to manage token minting and transfer permissions.
+This project includes an ERC721 token (PeakyBirds), an auction house contract (AuctionHouse), and an authority contract (ERC721Authority) to manage token minting and transfer permissions.
 
 ## Prerequisites
 
