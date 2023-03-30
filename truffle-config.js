@@ -43,9 +43,8 @@
 
 require('dotenv').config();
 const { MNEMONIC, PROJECT_ID } = process.env;
-
 const HDWalletProvider = require('@truffle/hdwallet-provider');
-
+const { MY_API_KEY } = process.env;
 module.exports = {
   /**
    * Networks define how you connect to your ethereum client and let you set the
@@ -56,7 +55,9 @@ module.exports = {
    *
    * $ truffle test --network <network-name>
    */
-
+  api_keys: {
+  etherscan: MY_API_KEY},
+  plugins: ['truffle-plugin-verify'],
   networks: {
     // Useful for testing. The `development` name is special - truffle uses it by default
     // if it's defined here and no other network is specified at the command line.
