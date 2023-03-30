@@ -14,16 +14,17 @@ contract PeakyBirds is ERC721URIStorage, Ownable {
     string public baseURI = "";
     uint256 public maxSupply;
     uint256 public currentSupply;
+    uint256 public maxMintedByOwner;
+    uint256 public mintedCountByOwner;
 
-    constructor(
-        address authorityAddress,
-        uint256 _maxSupply
-    ) ERC721("PeakyBirds", "PB") {
+    constructor(address authorityAddress) ERC721("PeakyBirds", "PB") {
         _tokenCounter = 0;
         authority = ERC721Authority(authorityAddress);
         mintingPaused = false;
-        maxSupply = _maxSupply;
+        maxSupply = 6174;
         currentSupply = 0;
+        maxMintedByOwner = 300;
+        mintedCountByOwner = 0;
     }
 
     function safeMint(address to, string memory tokenURI) public {
@@ -37,6 +38,16 @@ contract PeakyBirds is ERC721URIStorage, Ownable {
         _setTokenURI(_tokenCounter, tokenURI);
         currentSupply = currentSupply + 1;
         _tokenCounter++;
+    }
+
+    function DevMint(address to, uint256 tokenId) public onlyOwner {
+        require(
+            mintedCountByOwner < maxMintedByOwner,
+            "Max minted by owner reached"
+        );
+
+        _mint(to, tokenId);
+        mintedCountByOwner = mintedCountByOwner + 1;
     }
 
     // Function to toggle mintingPaused state
