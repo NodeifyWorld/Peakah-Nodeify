@@ -20,6 +20,7 @@ contract AuctionHouse is ERC721Holder, Ownable, ReentrancyGuard {
         uint256 endTime;
         address payable highestBidder;
         uint256 highestBid;
+        bool hasReceivedBids;
         bool ended;
     }
 
@@ -77,6 +78,16 @@ contract AuctionHouse is ERC721Holder, Ownable, ReentrancyGuard {
                 previousAuction.highestBidder,
                 previousAuction.tokenId
             );
+            if (!previousAuction.hasReceivedBids) {
+                erc721.burn(previousAuction.tokenId);
+            } else {
+                previousAuction.seller.transfer(previousAuction.highestBid);
+                IERC721(previousAuction.tokenAddress).safeTransferFrom(
+                    address(this),
+                    previousAuction.highestBidder,
+                    previousAuction.tokenId
+                );
+            }
             emit AuctionEnded(
                 auctionCounter - 1,
                 previousAuction.highestBidder,
@@ -94,6 +105,7 @@ contract AuctionHouse is ERC721Holder, Ownable, ReentrancyGuard {
             endTime: block.timestamp + auctionDuration,
             highestBidder: payable(address(0)),
             highestBid: 0,
+            hasReceivedBids: false,
             ended: false
         });
         auctionCounter = auctionCounter + 1;
@@ -116,6 +128,7 @@ contract AuctionHouse is ERC721Holder, Ownable, ReentrancyGuard {
 
         auction.highestBidder = payable(msg.sender);
         auction.highestBid = msg.value;
+        auction.hasReceivedBids = true;
         emit BidPlaced(auctionId, msg.sender, msg.value);
     }
 
