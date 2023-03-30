@@ -71,16 +71,10 @@ contract AuctionHouse is ERC721Holder, Ownable, ReentrancyGuard {
                 "Previous auction has already ended"
             );
 
-            previousAuction.ended = true;
-            previousAuction.seller.transfer(previousAuction.highestBid);
-            IERC721(previousAuction.tokenAddress).safeTransferFrom(
-                address(this),
-                previousAuction.highestBidder,
-                previousAuction.tokenId
-            );
             if (!previousAuction.hasReceivedBids) {
                 erc721.burn(previousAuction.tokenId);
             } else {
+                previousAuction.ended = true;
                 previousAuction.seller.transfer(previousAuction.highestBid);
                 IERC721(previousAuction.tokenAddress).safeTransferFrom(
                     address(this),
