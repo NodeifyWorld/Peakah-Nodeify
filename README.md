@@ -1,4 +1,4 @@
-# My NFT Project
+# Peaky Birds
 
 This project includes an ERC721 token (PeakyBirds), an auction house contract (AuctionHouse), and an authority contract (ERC721Authority) to manage token minting and transfer permissions.
 
@@ -13,8 +13,8 @@ This project includes an ERC721 token (PeakyBirds), an auction house contract (A
 
 1. Clone the repository and navigate to the project folder:
 
-git clone https://github.com/yourusername/my-nft-project.git
-cd my-nft-project
+git clone https://github.com/NodeifyWorld/Peakah-Nodeify.git
+cd Peakah-Nodeify
 
 2. Install the dependencies:
 
@@ -34,7 +34,7 @@ trufle compile
 
 truffle migrate --network rinkeby
 
-Replace `rinkeby` with the network you wish to deploy to.
+Replace `sepolia` with the network you wish to deploy to.
 
 ## Contracts
 
