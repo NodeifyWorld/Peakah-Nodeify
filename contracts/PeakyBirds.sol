@@ -27,17 +27,15 @@ contract PeakyBirds is ERC721URIStorage, Ownable {
         mintedCountByOwner = 0;
     }
 
-    function safeMint(address to, string memory tokenURI) public {
+    function safeMint(address to, uint256 tokenId) public {
         require(!mintingPaused, "Minting is currently paused");
         require(
             authority.isWhitelisted(msg.sender) || msg.sender == owner(),
             "Not allowed to mint"
         );
         require(currentSupply < maxSupply, "Max supply reached");
-        _safeMint(to, _tokenCounter);
-        _setTokenURI(_tokenCounter, tokenURI);
+        _safeMint(to, tokenId);
         currentSupply = currentSupply + 1;
-        _tokenCounter++;
     }
 
     function DevMint(address to, uint256 tokenId) public onlyOwner {
@@ -72,7 +70,9 @@ contract PeakyBirds is ERC721URIStorage, Ownable {
     }
 
     function withdraw() public payable onlyOwner {
-        (bool os, ) = payable(owner()).call{value: address(this).balance}("");
+        (bool os, ) = payable(owner()).call{value: address(this).balance}(
+            "Withdrawal failed"
+        );
         require(os);
     }
 }

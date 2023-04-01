@@ -16,7 +16,6 @@ contract AuctionHouse is ERC721Holder, Ownable, ReentrancyGuard {
         address tokenAddress;
         uint256 tokenId;
         address payable seller;
-        uint256 startingPrice;
         uint256 endTime;
         address payable highestBidder;
         uint256 highestBid;
@@ -29,6 +28,7 @@ contract AuctionHouse is ERC721Holder, Ownable, ReentrancyGuard {
     uint256 public auctionCounter;
     mapping(uint256 => Auction) public auctions;
     PeakyBirds public erc721;
+    uint256 public defaultStartingPrice;
 
     event AuctionCreated(uint256 indexed auctionId, uint256 tokenId);
     event BidPlaced(
@@ -46,59 +46,26 @@ contract AuctionHouse is ERC721Holder, Ownable, ReentrancyGuard {
         erc721 = PeakyBirds(erc721Address);
         nextAuctionStartTime = block.timestamp;
         auctionCounter = 0;
+        defaultStartingPrice = 0.1 ether;
     }
 
-    function createAuction(uint256 tokenId, uint256 startingPrice) external {
+    function createAuction() external {
         require(
             block.timestamp >= nextAuctionStartTime,
             "Auction not allowed yet"
         );
-        require(
-            erc721.getApproved(tokenId) == address(this) ||
-                erc721.isApprovedForAll(msg.sender, address(this)),
-            "Not approved"
-        );
 
-        // Automatically end the previous auction and transfer the NFT to the highest bidder
-        if (auctionCounter > 0) {
-            Auction storage previousAuction = auctions[auctionCounter - 1];
-            require(
-                block.timestamp >= previousAuction.endTime,
-                "Previous auction has not ended yet"
-            );
-            require(
-                !previousAuction.ended,
-                "Previous auction has already ended"
-            );
+        uint256 tokenId = erc721.currentSupply() + 1;
+        erc721.safeMint(address(this), tokenId);
 
-            if (!previousAuction.hasReceivedBids) {
-                erc721.burn(previousAuction.tokenId);
-            } else {
-                previousAuction.ended = true;
-                previousAuction.seller.transfer(previousAuction.highestBid);
-                IERC721(previousAuction.tokenAddress).safeTransferFrom(
-                    address(this),
-                    previousAuction.highestBidder,
-                    previousAuction.tokenId
-                );
-            }
-            emit AuctionEnded(
-                auctionCounter - 1,
-                previousAuction.highestBidder,
-                previousAuction.highestBid
-            );
-        }
-
-        erc721.safeTransferFrom(msg.sender, address(this), tokenId);
         uint256 auctionId = auctionCounter;
         auctions[auctionId] = Auction({
             tokenAddress: address(erc721),
             tokenId: tokenId,
             seller: payable(msg.sender),
-            startingPrice: startingPrice,
             endTime: block.timestamp + auctionDuration,
             highestBidder: payable(address(0)),
-            highestBid: 0,
+            highestBid: defaultStartingPrice,
             hasReceivedBids: false,
             ended: false
         });
@@ -112,7 +79,7 @@ contract AuctionHouse is ERC721Holder, Ownable, ReentrancyGuard {
         require(block.timestamp <= auction.endTime, "Auction has ended");
         require(
             msg.value > auction.highestBid &&
-                msg.value >= auction.startingPrice,
+                msg.value >= auction.highestBid.add(defaultStartingPrice),
             "Bid not high enough"
         );
 
@@ -130,11 +97,10 @@ contract AuctionHouse is ERC721Holder, Ownable, ReentrancyGuard {
         payable(msg.sender).transfer(address(this).balance);
     }
 
-    function setStartingPrice(
-        uint256 auctionId,
-        uint256 startingPrice
+    function setDefaultStartingPrice(
+        uint256 newDefaultStartingPrice
     ) external onlyOwner {
-        auctions[auctionId].startingPrice = startingPrice;
+        defaultStartingPrice = newDefaultStartingPrice;
     }
 
     function getTokenInfo(
@@ -142,5 +108,33 @@ contract AuctionHouse is ERC721Holder, Ownable, ReentrancyGuard {
     ) external view returns (string memory tokenURI, uint256 tokenId) {
         tokenId = auctions[auctionId].tokenId;
         tokenURI = erc721.tokenURI(tokenId);
+    }
+
+    function changeAuctionDuration(
+        uint256 _auctionDuration
+    ) external onlyOwner {
+        auctionDuration = _auctionDuration;
+    }
+
+    function forceEndAuction(uint256 auctionId) external onlyOwner {
+        Auction storage auction = auctions[auctionId];
+        require(!auction.ended, "Auction already ended");
+        auction.ended = true;
+        if (auction.hasReceivedBids) {
+            auction.highestBidder.transfer(auction.highestBid);
+            erc721.transferFrom(
+                address(this),
+                auction.highestBidder,
+                auction.tokenId
+            );
+            emit AuctionEnded(
+                auctionId,
+                auction.highestBidder,
+                auction.highestBid
+            );
+        } else {
+            erc721.transferFrom(address(this), auction.seller, auction.tokenId);
+            emit AuctionEnded(auctionId, address(0), 0);
+        }
     }
 }
