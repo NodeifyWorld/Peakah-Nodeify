@@ -66,9 +66,10 @@ module.exports = {
     // options below to some value.
     //
     development: {
-     host: "127.0.0.1",     // Localhost (default: none)
-     port: 8545,            // Standard Ethereum port (default: none)
-     network_id: "*",       // Any network (default: none)
+      host: "127.0.0.1",
+      port: 8545,
+      network_id: "*", // Match any network id
+      gas: 5500000,
     },
     //
     // An additional network, but with some advanced options…
@@ -86,6 +87,9 @@ module.exports = {
     sepolia: {
       provider: () => new HDWalletProvider(MNEMONIC, `https://sepolia.infura.io/v3/${PROJECT_ID}`),
       network_id: 11155111,       // Goerli's id
+      confirmations: 0,
+      timeoutBlocks: 20000,
+      skipDryRun: true,
       confirmations: 0,    // # of confirmations to wait between deployments. (default: 0)
       timeoutBlocks: 20000,  // # of blocks before a deployment times out  (minimum/default: 50)
       skipDryRun: true     // Skip dry run before migrations? (default: false for public nets )

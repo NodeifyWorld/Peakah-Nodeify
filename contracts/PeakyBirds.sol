@@ -69,10 +69,13 @@ contract PeakyBirds is ERC721URIStorage, Ownable {
         return baseURI;
     }
 
-    function withdraw() public payable onlyOwner {
-        (bool os, ) = payable(owner()).call{value: address(this).balance}(
-            "Withdrawal failed"
-        );
-        require(os);
+    function withdraw() public onlyOwner {
+        uint256 balance = address(this).balance;
+        require(balance > 0, "No balance to withdraw");
+        payable(msg.sender).transfer(balance);
+    }
+
+    function totalSupply() public view returns (uint256) {
+        return _tokenCounter;
     }
 }
