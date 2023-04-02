@@ -23,7 +23,8 @@ contract AuctionHouse is ERC721Holder, Ownable, ReentrancyGuard {
         bool ended;
     }
 
-    uint256 public auctionDuration = 18 hours;
+    uint256 public auctionDuration = 24 hours;
+    uint256 public biddingDuration = 18 hours;
     uint256 private nextAuctionStartTime;
     uint256 public auctionCounter;
     mapping(uint256 => Auction) public auctions;
@@ -49,12 +50,7 @@ contract AuctionHouse is ERC721Holder, Ownable, ReentrancyGuard {
         defaultStartingPrice = 0.1 ether;
     }
 
-    function createAuction() external {
-        require(
-            block.timestamp >= nextAuctionStartTime,
-            "Auction not allowed yet"
-        );
-
+    function createAuction() external onlyOwner {
         uint256 tokenId = erc721.currentSupply() + 1;
         erc721.safeMint(address(this), tokenId);
 
@@ -70,13 +66,15 @@ contract AuctionHouse is ERC721Holder, Ownable, ReentrancyGuard {
             ended: false
         });
         auctionCounter = auctionCounter + 1;
-        nextAuctionStartTime = block.timestamp + auctionDuration;
         emit AuctionCreated(auctionId, tokenId);
     }
 
     function placeBid(uint256 auctionId) external payable nonReentrant {
         Auction storage auction = auctions[auctionId];
-        require(block.timestamp <= auction.endTime, "Auction has ended");
+        require(
+            block.timestamp <= auction.endTime.sub(biddingDuration),
+            "Bidding period has ended"
+        );
         require(
             msg.value > auction.highestBid &&
                 msg.value >= auction.highestBid.add(defaultStartingPrice),
@@ -116,9 +114,16 @@ contract AuctionHouse is ERC721Holder, Ownable, ReentrancyGuard {
         auctionDuration = _auctionDuration;
     }
 
+    function changeBiddingDuration(
+        uint256 _biddingDuration
+    ) external onlyOwner {
+        biddingDuration = _biddingDuration;
+    }
+
     function forceEndAuction(uint256 auctionId) external onlyOwner {
         Auction storage auction = auctions[auctionId];
         require(!auction.ended, "Auction already ended");
+        require(block.timestamp > auction.endTime, "Auction still ongoing");
         auction.ended = true;
         if (auction.hasReceivedBids) {
             auction.highestBidder.transfer(auction.highestBid);

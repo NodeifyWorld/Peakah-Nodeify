@@ -1,4 +1,4 @@
-# My NFT Project
+# Peakah Daily Auction
 
 This project includes an ERC721 token (PeakyBirds), an auction house contract (AuctionHouse), and an authority contract (ERC721Authority) to manage token minting and transfer permissions.
 
@@ -42,8 +42,21 @@ Replace `rinkeby` with the network you wish to deploy to.
 - `ERC721Authority`: Manages minting and transfer permissions for the MyERC721 contract. It has a whitelist for the AuctionHouse contract and another whitelist for regular users. Minting can be enabled/disabled for regular users.
 - `AuctionHouse`: A contract that allows users to create auctions for their ERC721 tokens. The auction starts automatically, and a new auction begins once the previous auction ends and a new token is received. The highest bidder can claim the token at the end of the auction.
 
+## Auction Process
+
+Each of the functions forceEndAuction & createAuction should be called according to the following schedule:
+
+forceEndAuction: This function should be called once per auction cycle to finalize the auction after the 24-hour holding period. It should be called after the endTime of the ongoing auction has been reached (i.e., 24 hours after the auction started).
+
+createAuction: This function should be called once per auction cycle to start a new auction. It should be called right after successfully executing the forceEndAuction function for the previous auction.
+
+To ensure smooth transitions between auctions, the off-chain service should call these functions in sequence. For example, if you're using a server with a backend service, you can schedule a daily job that does the following:
+
+Call the forceEndAuction function for the ongoing auction after the 24-hour holding period has ended.
+Check if the forceEndAuction transaction was successful.
+Call the createAuction function to start a new auction immediately after the previous auction has been finalized.
+By following this schedule, your system will maintain a daily auction cycle where each auction has a 24-hour holding period, with bidding allowed only during the first 18 hours.
+
 ## License
 
 This project is licensed under the MIT License.
-
-
