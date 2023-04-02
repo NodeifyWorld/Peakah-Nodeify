@@ -1,20 +1,21 @@
-const { expect } = require("chai");
-const truffleAssert = require("truffle-assertions");
-
 const ERC721Authority = artifacts.require("ERC721Authority");
 const PeakyBirds = artifacts.require("PeakyBirds");
 const AuctionHouse = artifacts.require("AuctionHouse");
+
+const ERC721AuthorityAddress = "0xCF55ac8f5468B59156D8bb6fFC6CE1BB3D759d4f";
+const PeakyBirdsAddress = "0x3Ad51D5a5cBc079859256719173442B93D193c5D";
+const AuctionHouseAddress = "0x5528BC0A8F147d80bF502193C21799367CB34fF1";
 
 contract("Smart Contracts", (accounts) => {
   let authority, peakyBirds, auctionHouse;
   const [owner, addr1, addr2, addr3] = accounts;
 
-  beforeEach(async () => {
-    authority = await ERC721Authority.new({ from: owner });
-    peakyBirds = await PeakyBirds.new(authority.address, { from: owner });
-    auctionHouse = await AuctionHouse.new(peakyBirds.address, { from: owner });
+  before(async function () {
+    // Get the deployed contracts
+    authority = await ERC721Authority.at(ERC721AuthorityAddress);
+    peakyBirds = await PeakyBirds.at(PeakyBirdsAddress);
+    auctionHouse = await AuctionHouse.at(AuctionHouseAddress);
   });
-
   describe("ERC721Authority", function () {
     it("Should add an address to the whitelist", async function () {
       await authority.addToWhitelist(addr1, { from: owner });
@@ -160,5 +161,5 @@ contract("Smart Contracts", (accounts) => {
         expect(auction.ended).to.equal(true);
       });
     });
-
+  
 });

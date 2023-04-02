@@ -88,10 +88,10 @@ module.exports = {
       provider: () => new HDWalletProvider(MNEMONIC, `https://sepolia.infura.io/v3/${PROJECT_ID}`),
       network_id: 11155111,       // Goerli's id
       confirmations: 0,
-      timeoutBlocks: 20000,
+      timeoutBlocks: 200000,
       skipDryRun: true,
       confirmations: 0,    // # of confirmations to wait between deployments. (default: 0)
-      timeoutBlocks: 20000,  // # of blocks before a deployment times out  (minimum/default: 50)
+      timeoutBlocks: 200000,  // # of blocks before a deployment times out  (minimum/default: 50)
       skipDryRun: true     // Skip dry run before migrations? (default: false for public nets )
     },
     //
